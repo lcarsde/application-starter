@@ -34,19 +34,53 @@ css = b'''
     margin: 0;
 }
 .category {
+    font-family: 'Ubuntu Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 24px;
     color: #f90;
 }
-.spacer {
-    background-color: #99C;
+.line-end {
+    min-width: 20px;
+    background-color: #99F;
+    background: #99F; /* for Ubuntu */
     outline-style: none;
-    border-radius: 0;
+    border-width: 0;
+    box-shadow: none;
     padding: 0;
-    margin: 0 40px 0 0;
+    margin: 0;
+}
+.line-end--left {
+    border-radius: 20px 0 0 20px;
+}
+.line-end--right {
+    border-radius: 0 20px 20px 0;
 }
 .window {
     background-color: #000;
 }
 '''
+
+
+class CategoryLabel(Gtk.Box):
+    def __init__(self, label, css_provider):
+        Gtk.Box.__init__(self, orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+
+        line_end_left = Gtk.Label()
+        line_end_left.get_style_context().add_class("line-end")
+        line_end_left.get_style_context().add_class("line-end--left")
+        line_end_left.get_style_context().add_provider(css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        self.add(line_end_left)
+
+        category_label = Gtk.Label(label=label)
+        category_label.get_style_context().add_class("category")
+        category_label.get_style_context().add_provider(css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        self.add(category_label)
+
+        line_end_right = Gtk.Label()
+        line_end_right.get_style_context().add_class("line-end")
+        line_end_right.get_style_context().add_class("line-end--right")
+        line_end_right.get_style_context().add_provider(css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        self.add(line_end_right)
 
 
 class LcarsdeApplicationStarter(Gtk.Window):
@@ -58,6 +92,7 @@ class LcarsdeApplicationStarter(Gtk.Window):
 
     def __init__(self):
         Gtk.Window.__init__(self, title="Application Selector")
+        self.set_wmclass("Application Selector", "Application Selector")
 
         self.applications = {}
         self.load_system_applications()
@@ -137,9 +172,7 @@ class LcarsdeApplicationStarter(Gtk.Window):
 
     def display_apps(self):
         for category, apps in self.applications.items():
-            category_label = Gtk.Label(label=category)
-            category_label.get_style_context().add_class("category")
-            category_label.get_style_context().add_provider(self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+            category_label = CategoryLabel(category, self.css_provider)
             self.app_container.add(category_label)
 
     @staticmethod
