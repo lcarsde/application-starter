@@ -2,6 +2,8 @@
 
 import gi
 import os
+import subprocess
+from multiprocessing import Process
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
@@ -126,8 +128,9 @@ class AppButton(Gtk.Button):
         "f96",
         "c69"]
 
-    def __init__(self, label, css_provider):
+    def __init__(self, label, css_provider, command):
         Gtk.Button.__init__(self, label=adjust_name(label))
+        self.command = command
 
         first_letter = label[0]
         color = self.COLORS[ord(first_letter) % len(self.COLORS)]
@@ -139,7 +142,8 @@ class AppButton(Gtk.Button):
         self.get_style_context().add_provider(css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
     def start_application(self, widget):
-        pass
+        p = Process(target=lambda c: subprocess.Popen(c), args=(self.command.split()[0],))
+        p.start()
 
 
 class LcarsdeApplicationStarter(Gtk.Window):
@@ -248,7 +252,7 @@ class LcarsdeApplicationStarter(Gtk.Window):
             apps.sort(key=lambda e: e[0])
             flow_box = Gtk.FlowBox(homogeneous=True)
             for app in apps:
-                flow_box.add(AppButton(app[0], self.css_provider))
+                flow_box.add(AppButton(app[0], self.css_provider, app[1]))
 
             self.app_container.add(flow_box)
 
