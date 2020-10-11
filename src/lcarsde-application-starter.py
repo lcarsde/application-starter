@@ -61,6 +61,13 @@ css = b'''
 '''
 
 
+def sort_dict_by_key(data):
+    new_dict = {}
+    for key in sorted(data.keys()):
+        new_dict[key] = data[key]
+    return new_dict
+
+
 class CategoryLabel(Gtk.Box):
     def __init__(self, label, css_provider):
         Gtk.Box.__init__(self, orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
@@ -118,16 +125,22 @@ class LcarsdeApplicationStarter(Gtk.Window):
         name = None
         categories = None
         exe = None
+        no_display = False
         for line in data_lines:
             if line.startswith("Name="):
-                name = line[5:]
+                name = line[5:][0:18]
             elif line.startswith("Categories="):
                 categories = line[11:]
             elif line.startswith("Exec="):
                 exe = line[5:]
+            elif line.startswith("NoDisplay="):
+                no_display = line[10:].lower() == "true"
 
             if name is not None and categories is not None and exe is not None:
                 break
+
+        if not name or no_display:
+            return
 
         if not categories:
             categories = "Utility"
@@ -138,9 +151,9 @@ class LcarsdeApplicationStarter(Gtk.Window):
             category = "Utility"
 
         if category not in self.applications.keys():
-            self.applications[category] = set()
+            self.applications[category] = list()
 
-        self.applications[category].add((name, exe))
+        self.applications[category].append((name, exe))
 
     def get_category(self, categories):
         for preferred_category in self.PREFERRED_CATEGORIES:
@@ -171,9 +184,17 @@ class LcarsdeApplicationStarter(Gtk.Window):
         self.load_applications(path)
 
     def display_apps(self):
-        for category, apps in self.applications.items():
+        for category, apps in sort_dict_by_key(self.applications).items():
             category_label = CategoryLabel(category, self.css_provider)
             self.app_container.add(category_label)
+
+            apps.sort(key=lambda e: e[0])
+            flow_box = Gtk.FlowBox(homogeneous=True)
+            for app in apps:
+                button = Gtk.Button(label=app[0])
+                flow_box.add(button)
+
+            self.app_container.add(flow_box)
 
     @staticmethod
     def start_application(widget):
