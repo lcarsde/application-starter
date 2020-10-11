@@ -9,17 +9,17 @@ from gi.repository import Gtk
 
 css = b'''
 .button {
-    min-height: 30px;
+    min-height: 38px;
     font-family: 'Ubuntu Condensed', sans-serif;
     font-weight: 600;
-    font-size: 16px;
+    font-size: 18px;
     color: #000;
     text-shadow: none;
     outline-style: none;
     border-radius: 25px;
     border-width: 0;
     box-shadow: none;
-    padding: 2px 15px;
+    padding: 2px 20px;
     margin: 0;
 }
 .button--f90 {
@@ -81,11 +81,18 @@ css = b'''
 }
 '''
 
+
 def sort_dict_by_key(data):
     new_dict = {}
     for key in sorted(data.keys()):
         new_dict[key] = data[key]
     return new_dict
+
+
+def adjust_name(name):
+    if name != name[:18]:
+        return name[:18] + "…"
+    return name
 
 
 class CategoryLabel(Gtk.Box):
@@ -120,7 +127,7 @@ class AppButton(Gtk.Button):
         "c69"]
 
     def __init__(self, label, css_provider):
-        Gtk.Button.__init__(self, label=label)
+        Gtk.Button.__init__(self, label=adjust_name(label))
 
         first_letter = label[0]
         color = self.COLORS[ord(first_letter) % len(self.COLORS)]
@@ -178,7 +185,7 @@ class LcarsdeApplicationStarter(Gtk.Window):
         no_display = False
         for line in data_lines:
             if line.startswith("Name="):
-                name = line[5:][0:30]
+                name = line[5:]
             elif line.startswith("Categories="):
                 categories = line[11:]
             elif line.startswith("Exec="):
