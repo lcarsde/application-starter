@@ -8,30 +8,51 @@ from gi.repository import Gtk
 
 
 css = b'''
-.select_button {
+.button {
+    min-height: 30px;
     font-family: 'Ubuntu Condensed', sans-serif;
     font-weight: 600;
-    font-size: 15px;
+    font-size: 16px;
     color: #000;
     text-shadow: none;
-    background-color: #99F;
-    background: #99F; /* for Ubuntu */
     outline-style: none;
-    border-radius: 0;
+    border-radius: 25px;
     border-width: 0;
     box-shadow: none;
-    padding: 2px 3px;
+    padding: 2px 15px;
     margin: 0;
 }
-.close_button {
-    background-color: #C66;
-    background: #C66; /* for Ubuntu */
-    outline-style: none;
-    border-radius: 0 20px 20px 0;
-    border-width: 0;
-    box-shadow: none;
-    padding: 0;
-    margin: 0;
+.button--f90 {
+    background-color: #f90;
+    background: #f90; /* for Ubuntu */
+}
+.button--c9c {
+    background-color: #c9c;
+    background: #c9c; /* for Ubuntu */
+}
+.button--99c {
+    background-color: #99c;
+    background: #99c; /* for Ubuntu */
+}
+.button--c66 {
+    background-color: #c66;
+    background: #c66; /* for Ubuntu */
+}
+.button--fc9 {
+    background-color: #fc9;
+    background: #fc9; /* for Ubuntu */
+}
+.button--99f {
+    background-color: #99f;
+    background: #99f; /* for Ubuntu */
+}
+.button--f96 {
+    background-color: #f96;
+    background: #f96; /* for Ubuntu */
+}
+.button--c69 {
+    background-color: #f96;
+    background: #f96; /* for Ubuntu */
 }
 .category {
     font-family: 'Ubuntu Condensed', sans-serif;
@@ -59,7 +80,6 @@ css = b'''
     background-color: #000;
 }
 '''
-
 
 def sort_dict_by_key(data):
     new_dict = {}
@@ -90,6 +110,31 @@ class CategoryLabel(Gtk.Box):
         self.add(line_end_right)
 
 
+class AppButton(Gtk.Button):
+    COLORS = [
+        "c9c",
+        "99c",
+        "c66",
+        "99f",
+        "f96",
+        "c69"]
+
+    def __init__(self, label, css_provider):
+        Gtk.Button.__init__(self, label=label)
+
+        first_letter = label[0]
+        color = self.COLORS[ord(first_letter) % len(self.COLORS)]
+
+        self.set_alignment(1, 1)
+        self.connect("clicked", self.start_application)
+        self.get_style_context().add_class("button")
+        self.get_style_context().add_class("button--{}".format(color))
+        self.get_style_context().add_provider(css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+
+    def start_application(self, widget):
+        pass
+
+
 class LcarsdeApplicationStarter(Gtk.Window):
     """
     Application selector main window
@@ -108,17 +153,22 @@ class LcarsdeApplicationStarter(Gtk.Window):
         self.css_provider = Gtk.CssProvider()
         self.css_provider.load_from_data(css)
 
-        scroll_container = Gtk.ScrolledWindow()
-        scroll_container.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        self.scroll_container = Gtk.ScrolledWindow()
+        self.scroll_container.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
 
         self.app_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         self.display_apps()
 
-        scroll_container.add(self.app_container)
-        self.add(scroll_container)
+        self.scroll_container.add(self.app_container)
+        self.add(self.scroll_container)
+        self.connect('size-allocate', self.view_changed)
 
         self.get_style_context().add_class("window")
         self.get_style_context().add_provider(self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+
+    def view_changed(self, widget, event, data=None):
+        adj = self.scroll_container.get_vadjustment()
+        adj.set_value(0)
 
     def add_application(self, app_data):
         data_lines = app_data.splitlines()
@@ -128,7 +178,7 @@ class LcarsdeApplicationStarter(Gtk.Window):
         no_display = False
         for line in data_lines:
             if line.startswith("Name="):
-                name = line[5:][0:18]
+                name = line[5:][0:30]
             elif line.startswith("Categories="):
                 categories = line[11:]
             elif line.startswith("Exec="):
@@ -191,14 +241,9 @@ class LcarsdeApplicationStarter(Gtk.Window):
             apps.sort(key=lambda e: e[0])
             flow_box = Gtk.FlowBox(homogeneous=True)
             for app in apps:
-                button = Gtk.Button(label=app[0])
-                flow_box.add(button)
+                flow_box.add(AppButton(app[0], self.css_provider))
 
             self.app_container.add(flow_box)
-
-    @staticmethod
-    def start_application(widget):
-        pass
 
 
 if __name__ == "__main__":
