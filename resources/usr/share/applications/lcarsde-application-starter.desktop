@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Application Starter
+Exec=lcarsde-application-starter.py
+Categories=System;
+Terminal=false
+NoDisplay=true
