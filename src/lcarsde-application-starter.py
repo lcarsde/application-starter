@@ -155,7 +155,6 @@ class LcarsdeApplicationStarter(Gtk.Window):
 
     def __init__(self):
         Gtk.Window.__init__(self, title="Application Selector")
-        self.set_wmclass("Application Selector", "Application Selector")
 
         self.applications = {}
         self.load_system_applications()
