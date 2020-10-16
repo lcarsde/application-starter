@@ -132,8 +132,8 @@ class AppButton(Gtk.Button):
         Gtk.Button.__init__(self, label=adjust_name(label))
         self.command = command
 
-        first_letter = label[0]
-        color = self.COLORS[ord(first_letter) % len(self.COLORS)]
+        color_index = sum([ord(c) for c in label]) % len(self.COLORS)
+        color = self.COLORS[color_index]
 
         self.set_alignment(1, 1)
         self.connect("clicked", self.start_application)
