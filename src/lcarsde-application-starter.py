@@ -144,6 +144,7 @@ class AppButton(Gtk.Button):
     def start_application(self, widget):
         p = Process(target=lambda c: subprocess.Popen(c), args=(self.command.split()[0],))
         p.start()
+        Gtk.main_quit()
 
 
 class LcarsdeApplicationStarter(Gtk.Window):
