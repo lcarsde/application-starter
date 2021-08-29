@@ -9,6 +9,6 @@ Package: lcarsde-application-starter
 Architecture: any
 Depends: python3, python3-gi
 Recommends: fonts-ubuntu
-Provides: application starter
+Provides: lcarsde-application-starter
 Description: Menu of installed applications for LCARSDE
  https://lcarsde.github.io
