@@ -2,11 +2,9 @@
 
 import gi
 import os
-import subprocess
-from multiprocessing import Process
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk
+from gi.repository import Gtk, Gio
 
 
 css = b'''
@@ -128,9 +126,9 @@ class AppButton(Gtk.Button):
         "f96",
         "c69"]
 
-    def __init__(self, label, css_provider, command):
+    def __init__(self, label, css_provider, file_path):
         Gtk.Button.__init__(self, label=adjust_name(label))
-        self.command = command
+        self.file_path = file_path
 
         color_index = sum([ord(c) for c in label]) % len(self.COLORS)
         color = self.COLORS[color_index]
@@ -142,8 +140,8 @@ class AppButton(Gtk.Button):
         self.get_style_context().add_provider(css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
     def start_application(self, widget):
-        p = Process(target=lambda c: subprocess.Popen(c), args=(self.command.split()[0],))
-        p.start()
+        launcher = Gio.DesktopAppInfo.new_from_filename(self.file_path)
+        launcher.launch([], None)
         Gtk.main_quit()
 
 
@@ -181,23 +179,20 @@ class LcarsdeApplicationStarter(Gtk.Window):
         adj = self.scroll_container.get_vadjustment()
         adj.set_value(0)
 
-    def add_application(self, app_data):
+    def add_application(self, file_path, app_data):
         data_lines = app_data.splitlines()
         name = None
         categories = None
-        exe = None
         no_display = False
         for line in data_lines:
             if line.startswith("Name="):
                 name = line[5:]
             elif line.startswith("Categories="):
                 categories = line[11:]
-            elif line.startswith("Exec="):
-                exe = line[5:]
             elif line.startswith("NoDisplay="):
                 no_display = line[10:].lower() == "true"
 
-            if name is not None and categories is not None and exe is not None:
+            if name is not None and categories is not None:
                 break
 
         if not name or no_display:
@@ -214,7 +209,7 @@ class LcarsdeApplicationStarter(Gtk.Window):
         if category not in self.applications.keys():
             self.applications[category] = list()
 
-        self.applications[category].append((name, exe))
+        self.applications[category].append((name, file_path))
 
     def get_category(self, categories):
         for preferred_category in self.PREFERRED_CATEGORIES:
@@ -230,12 +225,12 @@ class LcarsdeApplicationStarter(Gtk.Window):
         for file_path in app_files:
             try:
                 with open(file_path, 'r') as file:
-                    app_data.add(file.read())
+                    app_data.add((file_path, file.read()))
             except FileNotFoundError:
                 print("Unable to load {0}".format(file_path))
 
-        for d in app_data:
-            self.add_application(d)
+        for (file_path, data) in app_data:
+            self.add_application(file_path, data)
 
     def load_system_applications(self):
         self.load_applications("/usr/share/applications")
