@@ -18,6 +18,8 @@ jobs:
 
       # get deployment files for lcarsde-application-starter
       - run: git clone ssh://aur@aur.archlinux.org/lcarsde-application-starter.git
+      - run: cd lcarsde-application-starter&& git config user.email "$AUR_GIT_EMAIL"
+      - run: cd lcarsde-application-starter && git config user.name "$AUR_GIT_NAME"
 
       # log the current contents
       - run: cat lcarsde-application-starter/PKGBUILD
@@ -25,6 +27,7 @@ jobs:
 
       # update content
       - run: cd lcarsde-application-starter && sed -i -e "s/^pkgver=[0-9\.]*$/pkgver=$CIRCLE_TAG/" PKGBUILD
+      - run: cd lcarsde-application-starter && sed -i -e "s/^pkgrel=[0-9]*$/pkgrel=1/" PKGBUILD
       - run: cd lcarsde-application-starter && updpkgsums
       - run: cd lcarsde-application-starter && makepkg --printsrcinfo > .SRCINFO
 
