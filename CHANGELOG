@@ -1,3 +1,6 @@
+23.2
+* add support for flatpack programs
+
 23.1
 * update deb build to Ubuntu 22.04
 * use launcher instead of popen to open applications
