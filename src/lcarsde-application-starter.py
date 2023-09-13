@@ -157,6 +157,7 @@ class LcarsdeApplicationStarter(Gtk.Window):
 
         self.applications = {}
         self.load_system_applications()
+        self.load_flatpak_applications()
         self.load_user_applications()
 
         self.css_provider = Gtk.CssProvider()
@@ -234,6 +235,9 @@ class LcarsdeApplicationStarter(Gtk.Window):
 
     def load_system_applications(self):
         self.load_applications("/usr/share/applications")
+        
+    def load_flatpak_applications(self):
+        self.load_applications("/var/lib/flatpak/exports/share/applications")
 
     def load_user_applications(self):
         path = "{0}/.local/share/applications".format(os.environ.get('HOME'))
