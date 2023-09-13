@@ -219,19 +219,22 @@ class LcarsdeApplicationStarter(Gtk.Window):
         return categories[0]
 
     def load_applications(self, app_directory):
-        app_files = [os.path.join(app_directory, f)
-                     for f in os.listdir(app_directory)
-                     if os.path.isfile(os.path.join(app_directory, f))]
-        app_data = set()
-        for file_path in app_files:
-            try:
-                with open(file_path, 'r') as file:
-                    app_data.add((file_path, file.read()))
-            except FileNotFoundError:
-                print("Unable to load {0}".format(file_path))
+        try:
+            app_files = [os.path.join(app_directory, f)
+                         for f in os.listdir(app_directory)
+                         if os.path.isfile(os.path.join(app_directory, f))]
+            app_data = set()
+            for file_path in app_files:
+                try:
+                    with open(file_path, 'r') as file:
+                        app_data.add((file_path, file.read()))
+                except FileNotFoundError:
+                    print("Unable to load {0}".format(file_path))
 
-        for (file_path, data) in app_data:
-            self.add_application(file_path, data)
+            for (file_path, data) in app_data:
+                self.add_application(file_path, data)
+        except FileNotFoundError:
+            print("directory not found:", app_directory)
 
     def load_system_applications(self):
         self.load_applications("/usr/share/applications")
